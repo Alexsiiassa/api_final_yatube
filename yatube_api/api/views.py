@@ -1,13 +1,10 @@
-# TODO:  Напишите свой вариант
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-
-from posts.models import Comment, Follow, Group, Post
-
 from rest_framework import filters, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
+
+from posts.models import Comment, Follow, Group, Post
 
 from .permissions import AuthorPermission, FollowPermission
 from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
@@ -41,7 +38,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthorPermission,)
 
     def get_queryset(self):
-        post_id = self.kwargs.get('post_id')
+        post_id = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
         return Comment.objects.filter(post=post_id)
 
     def perform_create(self, serializer):
@@ -50,7 +47,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         if self.request.user != instance.author:
-            raise PermissionDenied('You can not delete someone elses comment!')
+            raise AuthorPermission('You can not delete someone elses comment!')
         instance.delete()
 
 
