@@ -45,11 +45,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
         serializer.save(post=post, author=self.request.user)
 
-    def perform_destroy(self, instance):
-        if self.request.user != instance.author:
-            raise AuthorPermission('You can not delete someone elses comment!')
-        instance.delete()
-
 
 class FollowViewSet(viewsets.ModelViewSet):
     """ViewSet for Follow
